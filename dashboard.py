@@ -16,7 +16,7 @@ st.set_page_config(
 # -------------------------------------------------------------
 SPREADSHEET_ID = "1aiOOaoXg_Yo00xh-X5A29W3NlfAm0xWq5nNYB1a-co4"
 
-@st.cache_data(ttl=600)  # Refresh otomatis tiap 10 menit
+@st.cache_data(ttl=600)
 def load_gsheet_data(sheet_name="Sheet1"):
     try:
         url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
@@ -24,11 +24,10 @@ def load_gsheet_data(sheet_name="Sheet1"):
     except Exception as e:
         return None
 
-# Memuat data live dari Google Sheet kamu
 df_live = load_gsheet_data()
 
 # -------------------------------------------------------------
-# 3. STRICT CSS OVERRIDE (PERSIS ACUAN FIGMA)
+# 3. FULLY RESPONSIVE CSS OVERRIDE (AUTO-ADAPT TO SCREEN SIZE)
 # -------------------------------------------------------------
 st.markdown("""<style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
@@ -42,6 +41,7 @@ st.markdown("""<style>
 
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main, * {
         font-family: 'DM Sans', sans-serif !important;
+        box-sizing: border-box !important;
     }
 
     html, body, [data-testid="stAppViewContainer"], .main {
@@ -53,31 +53,32 @@ st.markdown("""<style>
         background-color: transparent !important;
     }
 
+    /* CONTAINER RESPONSIVE PADDING */
     .main .block-container {
-        padding-top: 1.5rem !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
+        padding-top: 1.2rem !important;
+        padding-left: clamp(1rem, 2vw, 2rem) !important;
+        padding-right: clamp(1rem, 2vw, 2rem) !important;
         background-color: #EEF2F6 !important;
+        max-width: 100% !important;
     }
 
-    /* SIDEBAR BLUE SOLID (#013AC9) */
+    /* SIDEBAR RESPONSIVE */
     section[data-testid="stSidebar"] {
         background-color: #013AC9 !important;
         border: none !important;
-        min-width: 255px !important;
-        max-width: 255px !important;
+        width: clamp(210px, 16vw, 255px) !important;
+        min-width: 200px !important;
     }
 
     section[data-testid="stSidebar"] * {
         color: #FFFFFF !important;
     }
 
-    /* SIDEBAR COLLAPSE BUTTON - sembunyikan */
     section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
         display: none !important;
     }
 
-    /* NAV SIDEBAR TRANSPARENT BUTTON & SVG ROW */
+    /* NAV SIDEBAR BUTTONS */
     [class*="st-key-navrow_"] {
         position: relative !important;
         margin-bottom: 4px !important;
@@ -91,9 +92,10 @@ st.markdown("""<style>
         padding: 10px 14px;
         border-radius: 12px;
         color: #FFFFFF;
-        font-size: 13.5px;
+        font-size: clamp(12px, 0.9vw, 13.5px);
         font-weight: 500;
         pointer-events: none;
+        white-space: nowrap;
     }
     .nav-row svg { flex-shrink: 0; }
     .nav-row.active {
@@ -123,7 +125,7 @@ st.markdown("""<style>
         padding: 0 !important;
     }
 
-    /* FIX SELECTBOX FIGMA */
+    /* SELECTBOX STYLING */
     div[data-baseweb="select"] > div {
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0 !important;
@@ -134,7 +136,7 @@ st.markdown("""<style>
         color: #1E293B !important;
     }
 
-    /* FIX SLIDER BLUE #013AC9 */
+    /* SLIDER STYLING */
     div[data-baseweb="slider"] [role="slider"] {
         background-color: #013AC9 !important;
         border: 2px solid #FFFFFF !important;
@@ -152,20 +154,21 @@ st.markdown("""<style>
         font-size: 13px !important;
     }
 
-    /* CARDS UI FIGMA */
+    /* CARDS UI & RESPONSIVE METRICS */
     .ui-card {
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0;
         border-radius: 20px;
-        padding: 22px;
+        padding: clamp(14px, 1.5vw, 22px);
         box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.02);
         margin-bottom: 16px;
+        width: 100% !important;
     }
 
     .alert-card {
         background-color: #013AC9 !important;
         border-radius: 20px;
-        padding: 20px;
+        padding: clamp(14px, 1.5vw, 20px);
         color: white;
         height: 100%;
     }
@@ -173,21 +176,33 @@ st.markdown("""<style>
     .alert-body { font-size: 11.5px; line-height: 1.5; color: #FFFFFF; margin-bottom: 16px; }
     .alert-btn { background: rgba(255, 255, 255, 0.2); color: white; padding: 8px 14px; border-radius: 10px; font-size: 11px; font-weight: 600; display: inline-block; }
 
-    .kpi-card { background: #FFFFFF !important; border: 1px solid #E2E8F0; border-radius: 20px; padding: 20px; height: 100%; }
-    .kpi-label { font-size: 12px; color: #64748B; font-weight: 500; }
-    .kpi-value { font-size: 28px; font-weight: 700; color: #013AC9; margin: 4px 0px; }
+    .kpi-card { 
+        background: #FFFFFF !important; 
+        border: 1px solid #E2E8F0; 
+        border-radius: 20px; 
+        padding: clamp(12px, 1.2vw, 18px); 
+        height: 100%; 
+    }
+    .kpi-label { font-size: 11.5px; color: #64748B; font-weight: 500; }
+    /* Dynamic Font Size agar Angka KPI Tidak Pernah Pindah Baris */
+    .kpi-value { 
+        font-size: clamp(18px, 1.8vw, 26px) !important; 
+        font-weight: 700; 
+        color: #013AC9; 
+        margin: 4px 0px; 
+        white-space: nowrap !important;
+    }
 
     .custom-table { width: 100%; border-collapse: collapse; font-family: 'DM Sans', sans-serif !important; }
-    .custom-table th { text-align: left; font-size: 11px; font-weight: 600; color: #94A3B8; padding: 12px 8px; border-bottom: 1px solid #F1F5F9; }
-    .custom-table td { padding: 14px 8px; font-size: 12px; color: #1E293B; border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
+    .custom-table th { text-align: left; font-size: 11px; font-weight: 600; color: #94A3B8; padding: 10px 6px; border-bottom: 1px solid #F1F5F9; }
+    .custom-table td { padding: 10px 6px; font-size: 12px; color: #1E293B; border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
 
-    .badge { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: inline-block; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
     .badge-danger { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
     .badge-warning { background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
     .badge-info { background-color: #DBEAFE; color: #013AC9; border: 1px solid #BFDBFE; }
     .badge-gray { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
 
-    /* REAL BORDERED CONTAINERS */
     .st-key-filter_card > div,
     .st-key-chart_card > div,
     .st-key-progress_card > div,
@@ -210,8 +225,8 @@ st.markdown("""<style>
         border-left: 4px solid #013AC9 !important;
         border-radius: 14px !important;
         box-shadow: none !important;
-        padding: 10px 16px 4px 16px !important;
-        margin-bottom: 20px !important;
+        padding: 8px 14px 4px 14px !important;
+        margin-bottom: 16px !important;
     }
     .st-key-filter_card [data-testid="stWidgetLabel"] p {
         text-transform: uppercase !important;
@@ -230,6 +245,13 @@ st.markdown("""<style>
         color: #013AC9;
         text-transform: uppercase;
         margin-bottom: 4px;
+    }
+
+    /* MEDIA BREAKPOINTS UNTUK MONITORS / LAPTOPS */
+    @media (max-width: 1200px) {
+        .kpi-value { font-size: 18px !important; }
+        .alert-title { font-size: 13px; }
+        .alert-body { font-size: 11px; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -252,10 +274,10 @@ if "selected_module" not in st.session_state:
 
 with st.sidebar:
     st.markdown("""<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0px 25px 0px;">
-            <div style="width: 38px; height: 38px; background-color: #CCFF00; border-radius: 10px;"></div>
+            <div style="width: 38px; height: 38px; background-color: #CCFF00; border-radius: 10px; flex-shrink:0;"></div>
             <div>
-                <div style="font-size: 18px; font-weight: 700; line-height: 1.1; color: #FFFFFF;">PT X</div>
-                <div style="font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #CCFF00;">DASHBOARD</div>
+                <div style="font-size: 17px; font-weight: 700; line-height: 1.1; color: #FFFFFF;">PT X</div>
+                <div style="font-size: 9.5px; font-weight: 600; letter-spacing: 1px; color: #CCFF00;">DASHBOARD</div>
             </div>
         </div>""", unsafe_allow_html=True)
 
@@ -268,7 +290,7 @@ with st.sidebar:
                 st.session_state.selected_module = label
                 st.rerun()
 
-    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
     st.markdown("""<div style='font-size: 13px; font-weight: 600; opacity: 0.85; padding-left: 10px; display: flex; align-items: center; gap: 8px;'>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             Log Out
@@ -283,8 +305,8 @@ def render_header(title, subtitle):
     col_t, col_s = st.columns([3, 1])
     with col_t:
         st.markdown("<span style='color:#64748B; font-size:13px; font-weight:500;'>Hi Gigi,</span>", unsafe_allow_html=True)
-        st.markdown(f"<h1 style='color:#013AC9; font-size:26px; font-weight:700; margin-top:-6px;'>{title}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color:#64748B; font-size:13px; margin-top:-10px;'>{subtitle}</p>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='color:#013AC9; font-size:clamp(20px, 2vw, 26px); font-weight:700; margin-top:-6px;'>{title}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color:#64748B; font-size:12.5px; margin-top:-10px;'>{subtitle}</p>", unsafe_allow_html=True)
     with col_s:
         st.text_input("Search", placeholder="🔍 Search...", label_visibility="collapsed")
 
@@ -657,13 +679,13 @@ elif selected_module == "Margin Simulator":
         with k1:
             st.markdown(f"""<div class="kpi-card">
                 <div class="kpi-label">Current CM</div>
-                <div class="kpi-value" style="font-size:20px; white-space:nowrap;">{base_cm}%</div>
+                <div class="kpi-value">{base_cm}%</div>
             </div>""", unsafe_allow_html=True)
         with k2:
             badge_clr = "#DC2626" if calculated_cm < base_cm else "#166534"
             st.markdown(f"""<div class="kpi-card">
                 <div class="kpi-label">Scenario CM</div>
-                <div class="kpi-value" style="font-size:20px; white-space:nowrap; color:{badge_clr};">{calculated_cm}%</div>
+                <div class="kpi-value" style="color:{badge_clr};">{calculated_cm}%</div>
             </div>""", unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -671,13 +693,13 @@ elif selected_module == "Margin Simulator":
         with k3:
             st.markdown(f"""<div class="kpi-card">
                 <div class="kpi-label">Est. Revenue</div>
-                <div class="kpi-value" style="font-size:18px; white-space:nowrap;">Rp{revenue/1000:,.0f}rb</div>
+                <div class="kpi-value">Rp{revenue/1000:,.0f}rb</div>
             </div>""", unsafe_allow_html=True)
         with k4:
             badge_clr = "#DC2626" if margin_diff < 0 else "#166534"
             st.markdown(f"""<div class="kpi-card">
                 <div class="kpi-label">Delta vs Baseline</div>
-                <div class="kpi-value" style="font-size:18px; white-space:nowrap; color:{badge_clr};">{margin_diff} pt</div>
+                <div class="kpi-value" style="color:{badge_clr};">{margin_diff} pt</div>
             </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -704,7 +726,7 @@ elif selected_module == "Margin Simulator":
 # -------------------------------------------------------------
 else:
     render_header("Settings", "System configuration and data dictionary mapping")
-    
+
     sync_status = "Active Syncing (Real-time)" if df_live is not None else "Connection Warning (Using Fallback)"
     status_color = "#166534" if df_live is not None else "#DC2626"
 
