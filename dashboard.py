@@ -74,8 +74,25 @@ st.markdown("""<style>
         color: #FFFFFF !important;
     }
 
-    section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
+    /* JANGAN disembunyikan - ini mekanisme responsif bawaan Streamlit
+       buat collapse/overlay sidebar di layar sempit (HP/tablet).
+       Kalau di-hide, sidebar SELALU makan tempat permanen di semua
+       ukuran layar, itu penyebab utama dashboard kerasa "kaku". */
+    section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] button {
+        color: #FFFFFF !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg {
+        stroke: #FFFFFF !important;
+        fill: #FFFFFF !important;
+    }
+
+    /* Di layar sempit, biarkan sidebar collapse total (width 0) saat
+       tombolnya diklik - jangan dikunci width minimum di kondisi itu */
+    @media (max-width: 768px) {
+        section[data-testid="stSidebar"][aria-expanded="false"] {
+            width: 0px !important;
+            min-width: 0px !important;
+        }
     }
 
     /* NAV SIDEBAR BUTTONS */
@@ -263,10 +280,10 @@ st.markdown("""<style>
         .alert-body { font-size: 11px; }
     }
 
-    /* MEDIA BREAKPOINT UNTUK TABLET / HP - Streamlit sendiri sudah
-       nge-stack st.columns jadi vertikal di bawah ~640px, kita cuma
-       rapikan padding & ukuran biar nggak sesak */
-    @media (max-width: 640px) {
+    /* MEDIA BREAKPOINT UNTUK TABLET / HP - jangan gantung ke default
+       behavior Streamlit (suka nggak konsisten kalau ketimpa CSS kustom
+       kita) - paksa manual: semua st.columns jadi 1 kolom penuh */
+    @media (max-width: 768px) {
         .main .block-container {
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
@@ -278,6 +295,22 @@ st.markdown("""<style>
             padding: 8px 10px 4px 10px !important;
         }
         .kpi-value { font-size: 20px !important; }
+
+        div[data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+        }
+        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            width: 100% !important;
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+        /* alert-card & kpi-card pakai height:100% buat nyamain tinggi pas
+           sejajar horizontal - begitu di-stack vertikal, height:100% jadi
+           nggak relevan (malah bisa collapse ke 0), jadi di-auto-in lagi */
+        .alert-card, .kpi-card {
+            height: auto !important;
+            margin-bottom: 12px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
