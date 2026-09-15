@@ -2,14 +2,34 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 
-# 1. Page Config
+# -------------------------------------------------------------
+# 1. PAGE CONFIG
+# -------------------------------------------------------------
 st.set_page_config(
     page_title="PT X - Beauty Management Dashboard",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. Strict CSS Override (Persis Acuan Figma)
+# -------------------------------------------------------------
+# 2. LIVE GOOGLE SHEETS DATA ENGINE
+# -------------------------------------------------------------
+SPREADSHEET_ID = "1aiOOaoXg_Yo00xh-X5A29W3NlfAm0xWq5nNYB1a-co4"
+
+@st.cache_data(ttl=600)  # Refresh otomatis tiap 10 menit
+def load_gsheet_data(sheet_name="Sheet1"):
+    try:
+        url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+        return pd.read_csv(url)
+    except Exception as e:
+        return None
+
+# Memuat data live dari Google Sheet kamu
+df_live = load_gsheet_data()
+
+# -------------------------------------------------------------
+# 3. STRICT CSS OVERRIDE (PERSIS ACUAN FIGMA)
+# -------------------------------------------------------------
 st.markdown("""<style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
 
@@ -52,18 +72,12 @@ st.markdown("""<style>
         color: #FFFFFF !important;
     }
 
-    /* SIDEBAR COLLAPSE BUTTON - sembunyikan (bukan bagian desain) */
+    /* SIDEBAR COLLAPSE BUTTON - sembunyikan */
     section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {
         display: none !important;
     }
 
-    /* NAV SIDEBAR - HTML row (icon SVG + label) buat TAMPILAN,
-       ditumpuk sama st.button transparan di atasnya buat NANGKEP KLIK.
-       Jadi ikonnya bebas pakai SVG asli (bukan emoji / font icon yang
-       bisa gagal load), dan tetap nggak ada bulatan radio sama sekali
-       karena elemen klik-nya beneran <button>, bukan <input type=radio>.
-       Selector pakai [class*="st-key-navrow_"] karena key container-nya
-       mengandung spasi/"&" yang bikin nama class jadi tidak simpel. */
+    /* NAV SIDEBAR TRANSPARENT BUTTON & SVG ROW */
     [class*="st-key-navrow_"] {
         position: relative !important;
         margin-bottom: 4px !important;
@@ -87,10 +101,6 @@ st.markdown("""<style>
         color: #013AC9 !important;
         font-weight: 700;
     }
-    /* section[data-testid="stSidebar"] * {color:#FFFFFF !important} di atas
-       nembak langsung ke <span>/<svg> di dalam sini, jadi menang dibanding
-       warna dari parent .nav-row.active (direct selector > inheritance).
-       Makanya perlu di-override eksplisit lagi di sini. */
     .nav-row.active span,
     .nav-row.active svg {
         color: #013AC9 !important;
@@ -113,8 +123,7 @@ st.markdown("""<style>
         padding: 0 !important;
     }
 
-
-    /* FIX SELECTBOX FIGMA: DIDALAM CONTAINER FILTER PUTIH */
+    /* FIX SELECTBOX FIGMA */
     div[data-baseweb="select"] > div {
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0 !important;
@@ -143,7 +152,7 @@ st.markdown("""<style>
         font-size: 13px !important;
     }
 
-    /* CARDS UI FIGMA (dipakai untuk block HTML statis / single markdown call) */
+    /* CARDS UI FIGMA */
     .ui-card {
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0;
@@ -178,15 +187,7 @@ st.markdown("""<style>
     .badge-info { background-color: #DBEAFE; color: #013AC9; border: 1px solid #BFDBFE; }
     .badge-gray { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
 
-    /* ----------------------------------------------------------------
-       REAL bordered containers (st.container(border=True, key=...)).
-       Ini menggantikan pola lama "buka <div> pakai st.markdown, taruh
-       widget/chart di tengah, tutup </div> pakai st.markdown lagi" --
-       yang TIDAK pernah benar-benar membungkus apa pun, karena tiap
-       pemanggilan Streamlit jadi elemen terpisah.
-       Dengan key=... tiap container dapat class unik "st-key-<key>",
-       jadi kita bisa styling presisi tanpa selector :has() yang general.
-       ---------------------------------------------------------------- */
+    /* REAL BORDERED CONTAINERS */
     .st-key-filter_card > div,
     .st-key-chart_card > div,
     .st-key-progress_card > div,
@@ -203,10 +204,6 @@ st.markdown("""<style>
         padding: 6px !important;
     }
 
-    /* FILTER BAR dibedain dari card data lain:
-       - background tint biru muda (bukan putih polos kayak ui-card)
-       - aksen border kiri warna primary
-       - biar keliatan jelas "ini panel filter", bukan kartu data */
     .st-key-filter_card {
         background-color: #F3F6FE !important;
         border: 1px solid #DCE4FA !important;
@@ -237,9 +234,9 @@ st.markdown("""<style>
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Sidebar Header & Navigation
-# SVG path tiap ikon (Feather/Lucide style: stroke, garis tipis) - persis
-# gaya line-icon di Figma, bukan emoji atau font icon yang bisa gagal load.
+# -------------------------------------------------------------
+# 4. SIDEBAR HEADER & NAVIGATION
+# -------------------------------------------------------------
 ICON_SVG = {
     "Stock & Returns": '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>',
     "Safety Stock Alerts": '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>',
@@ -249,7 +246,6 @@ ICON_SVG = {
     "Settings": '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>',
 }
 NAV_ITEMS = list(ICON_SVG.keys())
-
 
 if "selected_module" not in st.session_state:
     st.session_state.selected_module = NAV_ITEMS[0]
@@ -280,7 +276,9 @@ with st.sidebar:
 
 selected_module = st.session_state.selected_module
 
-# 4. Header Builder
+# -------------------------------------------------------------
+# 5. HEADER BUILDER
+# -------------------------------------------------------------
 def render_header(title, subtitle):
     col_t, col_s = st.columns([3, 1])
     with col_t:
@@ -706,12 +704,17 @@ elif selected_module == "Margin Simulator":
 # -------------------------------------------------------------
 else:
     render_header("Settings", "System configuration and data dictionary mapping")
-    st.markdown("""<div class="ui-card">
+    
+    sync_status = "Active Syncing (Real-time)" if df_live is not None else "Connection Warning (Using Fallback)"
+    status_color = "#166534" if df_live is not None else "#DC2626"
+
+    st.markdown(f"""<div class="ui-card">
         <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">System Settings & Governance</h3>
         <p style="font-size:13px; color:#64748B;">Kelola integrasi data API, threshold alert stok, dan pemetaan data dictionary.</p>
         <hr style="border:none; border-top:1px solid #E2E8F0; margin:15px 0;">
-        <div style="font-size:12px; color:#1E293B;">
-            <b>Connected Data Engine:</b> PT_X_Pilot_Data_Pack.xlsx<br>
-            <b>Status:</b> Active Syncing
+        <div style="font-size:12px; color:#1E293B; line-height: 1.8;">
+            <b>Connected Data Engine:</b> Google Sheets API (Live CSV Sync)<br>
+            <b>Spreadsheet ID:</b> <code>1aiOOaoXg_Yo00xh-X5A29W3NlfAm0xWq5nNYB1a-co4</code><br>
+            <b>Status:</b> <span style="color:{status_color}; font-weight:700;">{sync_status}</span>
         </div>
     </div>""", unsafe_allow_html=True)
