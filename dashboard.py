@@ -346,6 +346,9 @@ NAV_ITEMS = list(ICON_SVG.keys())
 if "selected_module" not in st.session_state:
     st.session_state.selected_module = NAV_ITEMS[0]
 
+def _select_nav(label):
+    st.session_state.selected_module = label
+
 with st.sidebar:
     st.markdown("""<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0px 25px 0px;">
             <div style="width: 38px; height: 38px; background-color: #CCFF00; border-radius: 10px; flex-shrink:0;"></div>
@@ -360,9 +363,11 @@ with st.sidebar:
         slug = f"navrow_{i}"
         with st.container(key=slug):
             st.markdown(f'''<div class="nav-row {"active" if is_active else ""}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{"#013AC9" if is_active else "#FFFFFF"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{ICON_SVG[label]}</svg><span>{label}</span></div>''', unsafe_allow_html=True)
-            if st.button(label, key=f"nav_btn_{i}", use_container_width=True):
-                st.session_state.selected_module = label
-                st.rerun()
+            # on_click callback dijalankan Streamlit SEBELUM script di-render
+            # ulang, jadi session_state sudah ke-update duluan sebelum loop
+            # ini jalan lagi - highlight langsung akurat di rerun yang sama,
+            # tanpa perlu st.rerun() manual (yang bikin double rerun).
+            st.button(label, key=f"nav_btn_{i}", use_container_width=True, on_click=_select_nav, args=(label,))
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
     st.markdown("""<div style='font-size: 13px; font-weight: 600; opacity: 0.85; padding-left: 10px; display: flex; align-items: center; gap: 8px;'>
