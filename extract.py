@@ -1,19 +1,16 @@
+import gspread
+from google.oauth2.service_account import Credentials
 import pandas as pd
+import streamlit as st
 
-def extract_shade_performance(path="data/PT_X_Pilot_Data_Pack.xlsx"):
-    """Baca data shade group performance (stockout, overstock, return)."""
-    df = pd.read_excel(path, sheet_name="4_Shade_Group_Perf", header=3)
-    df = df.dropna(subset=["Shade Group"])  # buang baris judul/kosong
-    return df
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1aiOOaoXg_Yo00xh-X5A29W3NlfAm0xWq5nNYB1a-co4/edit?usp=sharing"
 
-def extract_product_performance(path="data/PT_X_Pilot_Data_Pack.xlsx"):
-    """Baca data per SKU (untuk nanti dipakai modul lain juga)."""
-    df = pd.read_excel(path, sheet_name="2_Product_Foundation", header=3)
-    df = df.dropna(subset=["SKU"])
-    return df
-
-if __name__ == "__main__":
-    # cara cepat ngetes: jalankan `python extract.py` di terminal
-    df = extract_shade_performance()
-    print(df.head())
-    print(df.columns.tolist())
+@st.cache_data(ttl=1800)
+def get_sheet_data(worksheet_name):
+    creds = Credentials.from_service_account_info(dict(st.secrets["gcp_service_account"])
+        dict(st.secrets["gcp_service_account"]), scopes=SCOPES
+    )
+    client = gspread.authorize(creds)
+    sheet = client.open_by_url(SHEET_URL).worksheet(worksheet_name)
+    return pd.DataFrame(sheet.get_all_records())
