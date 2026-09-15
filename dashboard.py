@@ -18,13 +18,28 @@ SPREADSHEET_ID = "1aiOOaoXg_Yo00xh-X5A29W3NlfAm0xWq5nNYB1a-co4"
 
 @st.cache_data(ttl=600)
 def load_gsheet_data(sheet_name="Sheet1"):
+    # timeout eksplisit (10 detik) - tanpa ini, pd.read_csv bisa nge-hang
+    # lama kalau network/koneksi ke Google lambat atau sheet-nya nggak
+    # public, dan itu nge-block SELURUH halaman karena Streamlit re-run
+    # semua kode dari atas tiap ada interaksi.
     try:
+        import requests
+        from io import StringIO
         url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-        return pd.read_csv(url)
-    except Exception as e:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        return pd.read_csv(StringIO(resp.text))
+    except Exception:
         return None
 
-df_live = load_gsheet_data()
+# PENTING: JANGAN panggil load_gsheet_data() di top-level di sini.
+# Datanya cuma dipakai di halaman Settings, tapi Streamlit re-run
+# SELURUH script tiap ada interaksi apapun (klik nav, geser slider,
+# dll) di halaman manapun. Kalau dipanggil di sini, setiap klik di
+# Stock & Returns / Margin Simulator / dll pun ikut nunggu network
+# call ke Google Sheets walau nggak butuh datanya sama sekali.
+# Makanya fetch-nya dipindah ke dalam blok "MODUL 6: SETTINGS" saja,
+# supaya cuma jalan pas halaman itu yang lagi dibuka.
 
 # -------------------------------------------------------------
 # 3. FULLY RESPONSIVE CSS OVERRIDE (AUTO-ADAPT TO SCREEN SIZE)
@@ -785,6 +800,9 @@ elif selected_module == "Margin Simulator":
 # -------------------------------------------------------------
 else:
     render_header("Settings", "System configuration and data dictionary mapping")
+
+    with st.spinner("Syncing with Google Sheets..."):
+        df_live = load_gsheet_data()
 
     sync_status = "Active Syncing (Real-time)" if df_live is not None else "Connection Warning (Using Fallback)"
     status_color = "#166534" if df_live is not None else "#DC2626"
