@@ -197,6 +197,15 @@ st.markdown("""<style>
     .custom-table th { text-align: left; font-size: 11px; font-weight: 600; color: #94A3B8; padding: 10px 6px; border-bottom: 1px solid #F1F5F9; }
     .custom-table td { padding: 10px 6px; font-size: 12px; color: #1E293B; border-bottom: 1px solid #F8FAFC; vertical-align: middle; }
 
+    /* WRAPPER SCROLL: biar tabel nggak overflow keluar card di layar sempit,
+       tapi bisa di-scroll horizontal di dalam card-nya sendiri */
+    .table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll .custom-table { min-width: 480px; }
+
     .badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; display: inline-block; white-space: nowrap; }
     .badge-danger { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
     .badge-warning { background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
@@ -252,6 +261,23 @@ st.markdown("""<style>
         .kpi-value { font-size: 18px !important; }
         .alert-title { font-size: 13px; }
         .alert-body { font-size: 11px; }
+    }
+
+    /* MEDIA BREAKPOINT UNTUK TABLET / HP - Streamlit sendiri sudah
+       nge-stack st.columns jadi vertikal di bawah ~640px, kita cuma
+       rapikan padding & ukuran biar nggak sesak */
+    @media (max-width: 640px) {
+        .main .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        .ui-card, .kpi-card, .alert-card {
+            padding: 14px !important;
+        }
+        .st-key-filter_card {
+            padding: 8px 10px 4px 10px !important;
+        }
+        .kpi-value { font-size: 20px !important; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -358,14 +384,14 @@ if selected_module == "Stock & Returns":
     with col_left:
         st.markdown("""<div class="ui-card">
             <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">SKU & Shade Health Matrix</h3>
-            <table class="custom-table">
+            <div class="table-scroll"><table class="custom-table">
                 <tr><th>Shade</th><th>Share</th><th>Stockout</th><th>Overstock</th><th>Return</th></tr>
                 <tr><td><span style="color:#F3E5D8;">●</span> <b>Light Neutral</b></td><td>22%</td><td><span class="badge badge-danger">18%</span></td><td>8%</td><td>5%</td></tr>
                 <tr><td><span style="color:#E2C4A8;">●</span> <b>Medium Warm</b></td><td>31%</td><td><span class="badge badge-danger">22%</span></td><td>6%</td><td>6%</td></tr>
                 <tr><td><span style="color:#D4B293;">●</span> <b>Medium Neutral</b></td><td>25%</td><td>14%</td><td>7%</td><td>5.5%</td></tr>
                 <tr><td><span style="color:#A07855;">●</span> <b>Tan / Deep</b></td><td>12%</td><td>5%</td><td><span class="badge badge-warning">26%</span></td><td><span class="badge badge-danger">11%</span></td></tr>
                 <tr><td><span style="color:#B8976C;">●</span> <b>Olive</b></td><td>10%</td><td>7%</td><td><span class="badge badge-warning">22%</span></td><td><span class="badge badge-warning">10.5%</span></td></tr>
-            </table>
+            </table></div>
         </div>""", unsafe_allow_html=True)
 
     with col_right:
@@ -450,14 +476,14 @@ elif selected_module == "Safety Stock Alerts":
     with col_l:
         st.markdown("""<div class="ui-card">
             <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">SKU & Shade Status</h3>
-            <table class="custom-table">
+            <div class="table-scroll"><table class="custom-table">
                 <tr><th>SKU</th><th>Shade</th><th>Stock</th><th>Threshold</th><th>Status</th></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Light Neutral</td><td>470</td><td>550</td><td><span class="badge badge-warning">Approaching</span></td></tr>
                 <tr><td>Z Hybrid Cushion</td><td>Medium Warm</td><td>180</td><td>800</td><td><span class="badge badge-danger">Below Safety</span></td></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Medium Neutral</td><td>620</td><td>650</td><td><span class="badge badge-info">Safety</span></td></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Tan / Deep</td><td>380</td><td>300</td><td><span class="badge badge-warning">Overstock</span></td></tr>
                 <tr><td>Z Hybrid Cushion</td><td>Olive</td><td>540</td><td>400</td><td><span class="badge badge-warning">Overstock</span></td></tr>
-            </table>
+            </table></div>
         </div>""", unsafe_allow_html=True)
 
     with col_r:
@@ -524,14 +550,14 @@ elif selected_module == "Product Lifecycle":
     with col_l:
         st.markdown("""<div class="ui-card">
             <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">SKU & Shade Status</h3>
-            <table class="custom-table">
+            <div class="table-scroll"><table class="custom-table">
                 <tr><th>SKU</th><th>Shade</th><th>Sales Share</th><th>Overstock</th><th>Status</th></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Light Neutral</td><td>28%</td><td>7.0%</td><td><span class="badge badge-info">Keep</span></td></tr>
                 <tr><td>Z Hybrid Cushion</td><td>Medium Warm</td><td>18%</td><td>9.0%</td><td><span class="badge badge-warning">Bundle</span></td></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Medium Neutral</td><td>12%</td><td>8.5%</td><td><span class="badge badge-gray">Routine</span></td></tr>
                 <tr><td>Z Soft Matte Foundation</td><td>Tan / Deep</td><td>12%</td><td>26.0%</td><td><span class="badge badge-danger">Hold</span></td></tr>
                 <tr><td>Z Hybrid Cushion</td><td>Olive</td><td>10%</td><td>22.0%</td><td><span class="badge badge-danger">Hold</span></td></tr>
-            </table>
+            </table></div>
         </div>""", unsafe_allow_html=True)
 
     with col_r:
@@ -609,14 +635,14 @@ elif selected_module == "Ad Spend & Cap":
     with col_l:
         st.markdown("""<div class="ui-card">
             <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">Ad Spend per Channel</h3>
-            <table class="custom-table">
+            <div class="table-scroll"><table class="custom-table">
                 <tr><th>Channel</th><th>Ad Spend Ratio</th><th>Cap</th><th>Status</th><th>Data Source</th></tr>
                 <tr><td>Marketplace A</td><td>13%</td><td>12%</td><td><span class="badge badge-danger">Above Cap</span></td><td>Automated</td></tr>
                 <tr><td>Platform O Social Commerce</td><td>15%</td><td>12%</td><td><span class="badge badge-danger">Above Cap</span></td><td>Manual</td></tr>
                 <tr><td>Website / CRM</td><td>8%</td><td>12%</td><td><span class="badge badge-info">Safe</span></td><td>Automated</td></tr>
                 <tr><td>Offline & Specialty Retail</td><td>5%</td><td>12%</td><td><span class="badge badge-info">Safe</span></td><td>Manual</td></tr>
                 <tr><td>Community / Reseller</td><td>6%</td><td>12%</td><td><span class="badge badge-info">Safe</span></td><td>Manual</td></tr>
-            </table>
+            </table></div>
         </div>""", unsafe_allow_html=True)
 
     with col_r:
@@ -706,7 +732,7 @@ elif selected_module == "Margin Simulator":
 
     st.markdown(f"""<div class="ui-card">
         <h3 style="font-size:15px; color:#013AC9; margin-bottom:14px; font-weight:600;">Historical Benchmark</h3>
-        <table class="custom-table">
+        <div class="table-scroll"><table class="custom-table">
             <tr><th>Campaign Type</th><th>Discount</th><th>ROAS</th><th>Repeat Purchase</th><th>Historical CM</th></tr>
             <tr><td>Double Date</td><td>24%</td><td>2.1x</td><td>18%</td><td><span class="badge badge-danger">Low (12.4%)</span></td></tr>
             <tr><td>Pay Day</td><td>9%</td><td>3x</td><td>27%</td><td><span class="badge badge-warning">Medium (18.1%)</span></td></tr>
@@ -718,7 +744,7 @@ elif selected_module == "Margin Simulator":
                 <td>-</td>
                 <td><span class="badge {'badge-danger' if calculated_cm < base_cm else 'badge-info'}">{'Low' if calculated_cm < base_cm else 'Good'} ({calculated_cm}%)</span></td>
             </tr>
-        </table>
+        </table></div>
     </div>""", unsafe_allow_html=True)
 
 # -------------------------------------------------------------
